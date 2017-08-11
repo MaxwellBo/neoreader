@@ -9,6 +9,7 @@ class Main(object):
         self.vim = vim
         self.speed = 350
         self.last_spoken = ""
+        self.current_process = None
 
     def get_indent_level(self, line: str) -> int:
         """
@@ -43,7 +44,9 @@ class Main(object):
         """
         speed = self.speed
         speed += 100 * self.get_indent_level(txt)  # TODO - multiline support
-        subprocess.run(["say", "-r", str(speed), self.mutate_speech(txt)])
+        if self.current_process:
+            self.current_process.kill()
+        subprocess.Popen(["say", "-r", str(speed), self.mutate_speech(txt)])
 
     @neovim.command('SpeakLine')
     def speak_line(self):
