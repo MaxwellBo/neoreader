@@ -88,3 +88,11 @@ class Main(object):
     def set_speed(self, speed):
         self.speed = int(speed)
 
+    @neovim.autocmd('InsertCharPre')
+    def handle_insert_char(self):
+        row, col = self.vim.api.win_get_cursor(self.vim.current.window)
+        line = self.vim.current.line
+
+        inserted = line[col - 1]
+
+        self.speak(inserted)
