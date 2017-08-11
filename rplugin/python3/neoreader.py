@@ -9,6 +9,18 @@ class Main(object):
         self.vim = vim
         self.speed = 350
         self.last_spoken = ""
+
+    def get_indent_level(self, line: str) -> int:
+        """
+        Given a line, return the indentation level
+        """
+        whitespaces = 1
+        if self.vim.api.get_option("expandtab"):
+            whitespaces = self.vim.api.get_option("shiftwidth")
+
+        leading_spaces = len(line) - len(line.lstrip())
+
+        return leading_spaces // whitespaces
         
     def get_current_selection(self) -> List[str]:
         """
@@ -29,7 +41,9 @@ class Main(object):
         """
         Runs TTS on the supplied string
         """
-        subprocess.run(["say", self.mutate_speech(txt)])
+        speed = self.speed
+        speed += 100 * self.get_indent_level(txt)  # TODO - multiline support
+        subprocess.run(["say", "-r", str(speed), self.mutate_speech(txt)])
 
     @neovim.command('SpeakLine')
     def speak_line(self):
@@ -70,7 +84,7 @@ class Main(object):
         for (target, replacement) in conversions.items():
             txt = txt.replace(target, replacement)
 
-        return f"[[ rate {self.speed} ]]" + txt
+        return txt
         
     @neovim.autocmd('CursorMoved')
     def handle_cursor_moved(self):
