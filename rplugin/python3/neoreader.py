@@ -1,15 +1,45 @@
 import neovim
 import subprocess
+from typing import List
+
 
 @neovim.plugin
 class Main(object):
     def __init__(self, vim):
         self.vim = vim
 
-    @neovim.command('DoItPython')
-    def doItPython(self):
+    def get_current_selection(self) -> List[str]:
+        """
+        Returns the current highlighted selection
+        """
+        buf = self.vim.current.buffer
+        line_start, col_start = buf.mark('<')
+        line_end, col_end = buf.mark('>')
+
+        lines = self.vim.api.buf_get_lines(buf, line_start - 1, line_end, True)
+
+        lines[0] = lines[0][col_start:]
+        lines[-1] = lines[-1][:col_end]
+
+        return lines
+
+    def speak(self, txt: str) -> None:
+        """
+        Runs TTS on the supplied string
+        """
+        subprocess.run(["say", txt])
+
+    @neovim.command('SpeakLine')
+    def speak_line(self):
         current = self.vim.current.line
-        self.vim.command(f'echo "{current}"')
-        subprocess.run(["say", current])
+
+        self.speak(current)
+
+    @neovim.command('SpeakRange', range=True)
+    def speak_range(self, line_range):
+        current = self.get_current_selection()
+        current = ' newline '.join(current)
+
+        self.speak(current)
         
 
