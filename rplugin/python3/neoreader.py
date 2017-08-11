@@ -60,3 +60,16 @@ class Main(object):
     @neovim.autocmd('CursorMoved')
     def handle_cursor_moved(self):
         self.speak_line()
+
+    @neovim.autocmd('InsertEnter')
+    def handle_insert_enter(self):
+        self.speak("INSERT ON")
+
+    @neovim.autocmd('InsertLeave')
+    def handle_insert_leave(self): 
+        self.speak("INSERT OFF")
+
+    @neovim.command("SpeakSpeed", count=1)
+    def set_speed(self, speed):
+        self.speed = int(speed)
+
