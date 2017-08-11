@@ -8,6 +8,7 @@ class Main(object):
     def __init__(self, vim):
         self.vim = vim
         self.speed = 350
+        self.last_spoken = ""
         
     def get_current_selection(self) -> List[str]:
         """
@@ -33,8 +34,12 @@ class Main(object):
     @neovim.command('SpeakLine')
     def speak_line(self):
         current = self.vim.current.line
-
-        self.speak(current)
+        if current == self.last_spoken:
+        # FIXME: Dirty hack. Should rather figure out whether changing lines
+            pass
+        else:
+            self.speak(current)
+            self.last_spoken = current
 
     @neovim.command('SpeakRange', range=True)
     def speak_range(self, line_range):
@@ -52,4 +57,6 @@ class Main(object):
     def mutate_speech(self, txt):
         return f"[[ rate {self.speed} ]]" + txt
         
-
+    @neovim.autocmd('CursorMoved')
+    def handle_cursor_moved(self):
+        self.speak_line()
