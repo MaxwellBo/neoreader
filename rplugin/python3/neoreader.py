@@ -55,6 +55,21 @@ class Main(object):
             return "-"
 
     def mutate_speech(self, txt):
+        # FIXME: Might be a hack, couldn't get it to read the punctuation
+
+        conversions = { ".": " fullstop ",
+                  ":": " colon ",
+                  "(": " open paren ",
+                  ")": " close paren ",
+                  "[": " open bracket ",
+                  "]": " close bracket ",
+                  "{": " open curly ",
+                  "}": " close curly "
+                  }
+        
+        for (target, replacement) in conversions.items():
+            txt = txt.replace(target, replacement)
+
         return f"[[ rate {self.speed} ]]" + txt
         
     @neovim.autocmd('CursorMoved')
