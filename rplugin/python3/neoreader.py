@@ -7,7 +7,8 @@ from typing import List
 class Main(object):
     def __init__(self, vim):
         self.vim = vim
-
+        self.speed = 350
+        
     def get_current_selection(self) -> List[str]:
         """
         Returns the current highlighted selection
@@ -27,7 +28,7 @@ class Main(object):
         """
         Runs TTS on the supplied string
         """
-        subprocess.run(["say", txt])
+        subprocess.run(["say", self.mutate_speech(txt)])
 
     @neovim.command('SpeakLine')
     def speak_line(self):
@@ -41,5 +42,14 @@ class Main(object):
         current = ' newline '.join(current)
 
         self.speak(current)
+
+    def make_sign(_, x: int) -> str:
+        if x >= 0:
+            return "+"
+        else:
+            return "-"
+
+    def mutate_speech(self, txt):
+        return f"[[ rate {self.speed} ]]" + txt
         
 
