@@ -1,0 +1,19 @@
+*neoreader.txt* A template of a remote Python plugin.
+
+                  Example Remote Python Plugin
+
+==============================================================================
+
+CONTENTS                                 *neoreader-contents*
+
+    1. Introduction .................... |neoreader-intro|
+
+
+Original Author:    Maxwell Bo & Lewis Bobbermen
+License:            GPL-3.0
+
+INTRODUCTION                                *neoreader-intro*
+
+A very simple example of a Python plugin in the new remote plugin style used by
+Neovim.
+
