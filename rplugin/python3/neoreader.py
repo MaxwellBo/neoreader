@@ -3,21 +3,40 @@ import subprocess
 from typing import List
 
 
+def var(name: str, default=''):
+    """
+    Helper function to create a property for a NeoVim variable with default.
+    """
+    @property
+    def inner(self):
+        val = self.vim.vars.get(name)
+        if val is None:
+            return default
+        return val
+
+    @inner.setter
+    def inner(self, new):
+        return self.vim.api.set_var(name, new)
+
+    return inner
+
+
 @neovim.plugin
 class Main(object):
     def __init__(self, vim):
         self.vim = vim
-        self.speed = 350
         self.last_spoken = ""
         self.current_process = None
 
-        self.interpret_generic = True
-        self.interpret_haskell_infix = False
-        self.speak_punctuation = False
-        self.speak_keypresses = False
-        self.speak_mode_transitions = False
-        self.auto_speak_line = True
-        self.pitch_factor = 1
+    # Configuration
+    interpret_generic = var('interpret_generic', True)
+    interpret_haskell_infix = var('interpret_haskell_infix', False)
+    speak_punctuation = var('speak_punctuation', False)
+    speak_keypresses = var('speak_keypresses', False)
+    speak_mode_transitions = var('speak_mode_transitions', False)
+    auto_speak_line = var('auto_speak_line', True)
+    pitch_factor = var('pitch_factor', 1)
+    speed = var('speak_speed', 350)
 
     def get_indent_level(self, line: str) -> int:
         """
@@ -147,6 +166,7 @@ class Main(object):
         if self.speak_mode_transitions:
             self.speak("INSERT OFF") # FIXME: Make this a sound
 
+    # FIXME - Remove this? (As we now have  let g:speak_speed = 400)
     @neovim.command("SpeakSpeed", count=1)
     def set_speed(self, speed):
         self.speed = int(speed)
