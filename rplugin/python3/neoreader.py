@@ -17,7 +17,7 @@ class Main(object):
         self.speak_keypresses = False
         self.speak_mode_transitions = False
         self.auto_speak_line = True
-        self.pitch_factor = 2
+        self.pitch_factor = 1
 
     def get_indent_level(self, line: str) -> int:
         """
@@ -66,10 +66,8 @@ class Main(object):
 
     @neovim.command('SpeakRange', range=True)
     def speak_range(self, line_range):
-        current = self.get_current_selection()
-        current = ' newline '.join(current)
-
-        self.speak(current)
+        for i in self.get_current_selection():
+            self.speak(i)
 
     def make_sign(_, x: int) -> str:
         if x >= 0:
