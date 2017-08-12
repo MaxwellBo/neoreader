@@ -4,6 +4,63 @@ from typing import List
 import enum
 import functools
 
+COMPARISONS =\
+    { " < ": "less than"
+    , " > " : "greater than"
+    , " >= ": "greater than or equal to"
+    , " <= " : "less than or equal to"
+    , " == " : "is equal to"
+    }
+
+STANDARD =\
+    { ",": ", comma, "
+    , ".": ", dot, "
+    , ":": ", colon, "
+    , "\n": ", newline, "
+    }
+
+BRACKET_PAIRINGS =\
+    { "(": ". open paren,"
+    , ")": ", close paren."
+    , "[": ". open bracket,"
+    , "]": ", close bracket."
+    , "{": ". open curly,"
+    , "}": ", close curly."
+    , "<": ". open angle,"
+    , ">": ", close angle."
+    }
+
+GENERIC_BIN_OPS =\
+    { "->": "stab"
+    , ">=>": "fish"
+    , "<=>": "spaceship"
+    , "=>": "fat arrow"
+    , "===": "triple equals"
+    , "++": "increment"
+    , "--": "decrement"
+    , "+=": "add with"
+    , "-=": "subtract with"
+    , "/=": "divide with"
+    , "*=": "multiply with"
+    }
+
+HASKELL_BIN_OPS =\
+    { ".": "compose"
+    , "&": "thread"
+    , "$": "apply"
+    , "->": "yields"
+    , "<-": "bind"
+    , "<$>": "effmap"
+    , "<$": "const map"
+    , "<*>": "applic"
+    , "*>": "sequence right"
+    , "<*": "sequence left"
+    , ">>=": "and then"
+    , "=<<": "bind"
+    , "<=<": "kleisli compose"
+    , ">>": "sequence right"
+    , "<<": "sequence left"
+    }
 
 def requires_option(option):
     def decorator(fn):
@@ -24,8 +81,10 @@ class Main(object):
         INTERPRET_HASKELL_INFIX = ('interpret_haskell_infix', False)
         SPEAK_BRACKETS = ('speak_brackets', False)
         SPEAK_KEYPRESSES = ('speak_keypresses', False)
+        SPEAK_WORDS = ('speak_words', True)
         SPEAK_MODE_TRANSITIONS = ('speak_mode_transitions', False)
         AUTO_SPEAK_LINE = ('auto_speak_line', True)
+        INDENT_STATUS = ('speak_indent', False)
         PITCH_FACTOR = ('pitch_factor', 1)
         SPEED = ('speak_speed', 350)
 
@@ -72,20 +131,62 @@ class Main(object):
 
         return lines
 
-    def speak(self, txt: str) -> None:
-        brackets = self.get_option(self.Options.SPEAK_BRACKETS)
-        generic = self.get_option(self.Options.INTERPRET_GENERIC)
-        haskell = self.get_option(self.Options.INTERPRET_HASKELL_INFIX)
+    def speak(self, 
+        txt: str,
+        brackets=None,
+        generic=None,
+        haskell=None,
+        speed=None,
+        indent_status=None,
+        newline=False,
+        literal=False,
+        stop=True
+        ):
 
-        speech = self.mutate_speech(txt, brackets=brackets, generic=generic, haskell=haskell)
-        subprocess.run(["say", "-r", str(self.get_option(self.Options.SPEED)), speech ])
+        if brackets is None:
+            brackets = self.get_option(self.Options.SPEAK_BRACKETS)
 
-    def speak_detail(self, txt: str) -> None:
-        speech = self.mutate_speech(txt, brackets=True, generic=False, haskell=False)
-        subprocess.run(["say", "-r", str(self.get_option(self.Options.SPEED) - 100), speech ])
+        if haskell is None:
+            haskell = self.get_option(self.Options.INTERPRET_HASKELL_INFIX)
 
-    def speak_literal(self, txt: str) -> None:
-        subprocess.run(["say", "-r", str(700), f"[[ char LTRL ]] {txt} [[ char NORM ]]"])
+        if generic is None:
+            generic = self.get_option(self.Options.INTERPRET_GENERIC)
+
+        if speed is None:
+            speed = self.get_option(self.Options.SPEED)
+
+        if indent_status is None:
+            indent_status = self.get_option(self.Options.INDENT_STATUS)
+
+        indent_level = self.get_indent_level(txt) 
+        pitch_mod = indent_level // self.get_option(self.Options.PITCH_FACTOR)
+
+        if literal:
+            txt = f"[[ char LTRL ]] {txt} [[ char NORM ]]"
+        else:
+            if haskell:
+                for (target, replacement) in HASKELL_BIN_OPS.items():
+                    txt = txt.replace(target, f" {replacement} ")
+
+            if generic:
+                for (target, replacement) in GENERIC_BIN_OPS.items():
+                    txt = txt.replace(target, f" {replacement} ")
+
+            for (target, replacement) in { **STANDARD, **COMPARISONS }.items():
+                txt = txt.replace(target, f" {replacement} ")
+
+            if brackets:
+                for (target, replacement) in BRACKET_PAIRINGS.items():
+                    txt = txt.replace(target, f" {replacement} ")
+
+            txt = f"[[ pbas +{pitch_mod}]]"\
+                + (f" indent {indent_level}, " if indent_status else "")\
+                + (f"{txt}," if txt.strip() else "")\
+                + (" newline" if newline else "")\
+                + (", STOP." if stop else "")
+
+        subprocess.run(["say", "-r", str(speed), txt])
+        
 
     def speak_line(self):
         current = self.vim.current.line
@@ -94,7 +195,7 @@ class Main(object):
             pass
         else:
             self.last_spoken = current
-            self.speak(current)
+            self.speak(current, newline=True)
 
     @neovim.command('SpeakRange', range=True)
     def speak_range(self, line_range):
@@ -104,98 +205,7 @@ class Main(object):
     @neovim.command('SpeakRangeDetail', range=True)
     def speak_range_detail(self, line_range):
         for i in self.get_current_selection():
-            self.speak_detail(i)
-
-
-    def make_sign(_, x: int) -> str:
-        if x >= 0:
-            return "+"
-        else:
-            return "-"
-
-    def mutate_speech(self, txt, haskell=False, generic=False, brackets=False, pitch=False):
-
-        comparisons =\
-            { " < ": "less than"
-            , " > " : "greater than"
-            , " >= ": "greater than or equal to"
-            , " <= " : "less than or equal to"
-            , " == " : "is equal to"
-            }
-
-        standard =\
-            { ",": ", comma, "
-            , ".": ", dot, "
-            , ":": ", colon, "
-            , "\n": ", newline, "
-            }
-
-        bracket_pairings =\
-            { "(": ". open paren,"
-            , ")": ", close paren."
-            , "[": ". open bracket,"
-            , "]": ", close bracket."
-            , "{": ". open curly,"
-            , "}": ", close curly."
-            , "<": ". open angle,"
-            , ">": ", close angle."
-            }
-        
-        generic_bin_ops =\
-            { "->": "stab"
-            , ">=>": "fish"
-            , "<=>": "spaceship"
-            , "=>": "fat arrow"
-            , "===": "triple equals"
-            , "++": "increment"
-            , "--": "decrement"
-            , "+=": "add with"
-            , "-=": "subtract with"
-            , "/=": "divide with"
-            , "*=": "multiply with"
-            }
-
-        haskell_bin_ops =\
-            { ".": "compose"
-            , "&": "thread"
-            , "$": "apply"
-            , "->": "yields"
-            , "<-": "bind"
-            , "<$>": "effmap"
-            , "<$": "const map"
-            , "<*>": "applic"
-            , "*>": "sequence right"
-            , "<*": "sequence left"
-            , ">>=": "and then"
-            , "=<<": "bind"
-            , "<=<": "kleisli compose"
-            , ">>": "sequence right"
-            , "<<": "sequence left"
-            }
-    
-        pitch_mod = self.get_indent_level(txt) // self.get_option(self.Options.PITCH_FACTOR)
-
-        if haskell:
-            for (target, replacement) in haskell_bin_ops.items():
-                txt = txt.replace(target, f" {replacement} ")
-
-        if generic:
-            for (target, replacement) in generic_bin_ops.items():
-                txt = txt.replace(target, f" {replacement} ")
-
-        for (target, replacement) in { **standard, **comparisons }.items():
-            txt = txt.replace(target, f" {replacement} ")
-
-        if brackets:
-            for (target, replacement) in bracket_pairings.items():
-                txt = txt.replace(target, f" {replacement} ")
-
-        
-        return f"[[ pbas +{pitch_mod}]]" + txt + " STOP."
-
-    def flush_stack(self):
-        self.speak_literal("".join(self.literal_stack))
-        self.literal_stack = []
+            self.speak(i, brackets=True, generic=False, haskell=False, speed=self.get_option(self.Options.SPEED) - 100)
 
     @neovim.autocmd('CursorMoved')
     @requires_option(Options.AUTO_SPEAK_LINE)
@@ -205,15 +215,20 @@ class Main(object):
     @neovim.autocmd('InsertEnter')
     @requires_option(Options.SPEAK_MODE_TRANSITIONS)
     def handle_insert_enter(self):
-        self.speak("INSERT ON") # FIXME: Make this a sound - see timeyyy/orchestra.nvim
+        self.speak("INSERT ON", stop=True)
 
     @neovim.autocmd('InsertLeave')
     @requires_option(Options.SPEAK_MODE_TRANSITIONS)
     def handle_insert_leave(self): 
-        self.speak("INSERT OFF") # FIXME: Make this a sound
+        self.speak("INSERT OFF", stop=True)
+
+    def flush_stack(self):
+        word = "".join(self.literal_stack)
+        self.literal_stack = []
+        if self.get_option(self.Options.SPEAK_KEYPRESSES):
+            self.speak(word, literal=True, speed=700)
 
     @neovim.autocmd('InsertCharPre', eval='[v:char, getpos(".")]')
-    @requires_option(Options.SPEAK_KEYPRESSES)
     def handle_insert_char(self, data):
         inserted, pos = data
         _, row, col, _ = pos
@@ -222,11 +237,16 @@ class Main(object):
 
         self.literal_stack.append(inserted)
 
+        speak_words = self.get_option(self.Options.SPEAK_WORDS)
+
         if inserted == ' ':
             self.flush_stack()
-            # Inserted a space, say the last inserted word
-            start_of_word = line.rfind(' ', 0, len(line) - 1)
-            word = line[start_of_word + 1:col]
-            self.speak(word)
+
+            if speak_words: 
+                # Inserted a space, say the last inserted word
+                start_of_word = line.rfind(' ', 0, len(line) - 1)
+                word = line[start_of_word + 1:col]
+                self.speak(word, brackets=True, generic=False, haskell=False, stop=False)
         elif len(self.literal_stack) > 4:
             self.flush_stack()
+
