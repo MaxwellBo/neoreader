@@ -87,6 +87,7 @@ class Main(object):
         INDENT_STATUS = ('speak_indent', False)
         PITCH_FACTOR = ('pitch_factor', 1)
         SPEED = ('speak_speed', 350)
+        USE_ESPEAK = ('use_espeak', False)
 
     def __init__(self, vim):
         self.vim = vim
@@ -131,6 +132,28 @@ class Main(object):
 
         return lines
 
+    def call_say(self, txt: str, speed=None, pitch=None, literal=False):
+        if self.get_option(self.Options.USE_ESPEAK):
+            args = ["espeak"]
+            if pitch:
+                args += ["-p", str(pitch)]
+            if speed:
+                args += ["-s", str(speed)]
+            if literal:
+                txt = " ".join(txt)
+            args.append(txt)
+        else:
+            args = ["say"]
+            if pitch:
+                txt = f"[[ pbas +{pitch}]] {txt}"
+            if speed:
+                args += ["-r", str(speed)]
+            if literal:
+                txt = f"[[ char LTRL ]] {txt}"
+            args.append(txt)
+
+        subprocess.run(args)
+
     def speak(self, 
         txt: str,
         brackets=None,
@@ -162,7 +185,7 @@ class Main(object):
         pitch_mod = indent_level // self.get_option(self.Options.PITCH_FACTOR)
 
         if literal:
-            txt = f"[[ char LTRL ]] {txt} [[ char NORM ]]"
+            self.call_say(txt, speed=speed, literal=literal)
         else:
             if haskell:
                 for (target, replacement) in HASKELL_BIN_OPS.items():
@@ -179,13 +202,15 @@ class Main(object):
                 for (target, replacement) in BRACKET_PAIRINGS.items():
                     txt = txt.replace(target, f" {replacement} ")
 
-            txt = f"[[ pbas +{pitch_mod}]]"\
-                + (f" indent {indent_level}, " if indent_status else "")\
-                + (f"{txt}," if txt.strip() else "")\
-                + (" newline" if newline else "")\
-                + (", STOP." if stop else "")
-
-        subprocess.run(["say", "-r", str(speed), txt])
+            if indent_status:
+                txt = f"indent {index_level}, {txt}"
+            if txt.strip():
+                txt = f"{txt},"
+            if newline:
+                txt = f"{txt} newline"
+            if stop:
+                txt = f"{txt}, STOP."
+            self.call_say(txt, speed=speed, pitch=pitch_mod)
         
     @neovim.command('SpeakLine')
     def cmd_speak_line(self):
