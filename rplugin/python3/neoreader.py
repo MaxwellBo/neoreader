@@ -169,12 +169,16 @@ class Main(object):
     def handle_insert_leave(self): 
         self.speak("INSERT OFF") # FIXME: Make this a sound
 
-    @neovim.autocmd('InsertCharPre')
+    @neovim.autocmd('InsertCharPre', eval="v:char")
     @requires_option(Options.SPEAK_KEYPRESSES)
-    def handle_insert_char(self):
+    def handle_insert_char(self, inserted):
         row, col = self.vim.api.win_get_cursor(self.vim.current.window)
         line = self.vim.current.line
 
-        inserted = line[col - 1]
-
         self.speak(inserted)
+
+        if inserted == ' ':
+            # Inserted a space, say the last inserted word
+            start_of_word = line.rfind(' ', 0, len(line) - 1)
+            word = line[start_of_word + 1:col]
+            self.speak(word)
