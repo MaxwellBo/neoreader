@@ -17,6 +17,7 @@ class Main(object):
         self.speak_keypresses = False
         self.speak_mode_transitions = False
         self.auto_speak_line = True
+        self.pitch_factor = 2
 
     def get_indent_level(self, line: str) -> int:
         """
@@ -117,7 +118,7 @@ class Main(object):
                   , "<<": "sequence left"
                   }
     
-        pitch_mod = self.get_indent_level(txt)  # TODO - multiline support
+        pitch_mod = self.get_indent_level(txt) // self.pitch_factor  # TODO - multiline support
 
         if self.interpret_haskell_infix:
             for (target, replacement) in haskell.items():
