@@ -14,6 +14,9 @@ class Main(object):
         self.interpret_generic = True
         self.interpret_haskell_infix = False
         self.speak_punctuation = False
+        self.speak_keypresses = False
+        self.speak_mode_transitions = False
+        self.auto_speak_line = True
 
     def get_indent_level(self, line: str) -> int:
         """
@@ -57,8 +60,8 @@ class Main(object):
         # FIXME: Dirty hack. Should rather figure out whether changing lines
             pass
         else:
-            self.speak(current)
             self.last_spoken = current
+            self.speak(current)
 
     @neovim.command('SpeakRange', range=True)
     def speak_range(self, line_range):
@@ -132,15 +135,18 @@ class Main(object):
         
     @neovim.autocmd('CursorMoved')
     def handle_cursor_moved(self):
-        self.speak_line()
+        if self.auto_speak_line:
+            self.speak_line()
 
     @neovim.autocmd('InsertEnter')
     def handle_insert_enter(self):
-        self.speak("INSERT ON")
+        if self.speak_mode_transitions:
+            self.speak("INSERT ON") # FIXME: Make this a sound - see timeyyy/orchestra.nvim
 
     @neovim.autocmd('InsertLeave')
     def handle_insert_leave(self): 
-        self.speak("INSERT OFF")
+        if self.speak_mode_transitions:
+            self.speak("INSERT OFF") # FIXME: Make this a sound
 
     @neovim.command("SpeakSpeed", count=1)
     def set_speed(self, speed):
@@ -148,9 +154,10 @@ class Main(object):
 
     @neovim.autocmd('InsertCharPre')
     def handle_insert_char(self):
-        row, col = self.vim.api.win_get_cursor(self.vim.current.window)
-        line = self.vim.current.line
+        if self.speak_keypresses:
+            row, col = self.vim.api.win_get_cursor(self.vim.current.window)
+            line = self.vim.current.line
 
-        inserted = line[col - 1]
+            inserted = line[col - 1]
 
-        self.speak(inserted)
+            self.speak(inserted)
