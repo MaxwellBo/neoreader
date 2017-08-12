@@ -23,7 +23,7 @@ class Main(object):
         INTERPRET_GENERIC = ('interpret_generic', True)
         INTERPRET_HASKELL_INFIX = ('interpret_haskell_infix', False)
         SPEAK_PUNCTUATION = ('speak_punctuation', False)
-        SPEAK_KEYPRESSES = ('speak_keypresses', False)
+        SPEAK_KEYPRESSES = ('speak_keypresses', True)
         SPEAK_MODE_TRANSITIONS = ('speak_mode_transitions', False)
         AUTO_SPEAK_LINE = ('auto_speak_line', True)
         PITCH_FACTOR = ('pitch_factor', 1)
@@ -33,6 +33,7 @@ class Main(object):
         self.vim = vim
         self.last_spoken = ""
         self.current_process = None
+        self.literal_stack = []
 
     def get_option(self, option):
         name, default = option.value
@@ -69,12 +70,10 @@ class Main(object):
         return lines
 
     def speak(self, txt: str) -> None:
-        """
-        Runs TTS on the supplied string
-        """
-        # if self.current_process:
-        #     self.current_process.kill()
         subprocess.run(["say", "-r", str(self.get_option(self.Options.SPEED)), self.mutate_speech(txt)])
+
+    def speak_literal(self, txt: str) -> None:
+        subprocess.run(["say", "-r", str(700), f"[[ char LTRL ]] {txt} [[ char NORM ]]"])
 
     @neovim.command('SpeakLine')
     def speak_line(self):
@@ -153,7 +152,11 @@ class Main(object):
                 txt = txt.replace(target, f" {replacement} ")
 
         return f"[[ pbas +{pitch_mod}]]" + txt
-        
+
+    def flush_stack(self):
+        self.speak_literal("".join(self.literal_stack))
+        self.literal_stack = []
+
     @neovim.autocmd('CursorMoved')
     @requires_option(Options.AUTO_SPEAK_LINE)
     def handle_cursor_moved(self):
@@ -169,16 +172,21 @@ class Main(object):
     def handle_insert_leave(self): 
         self.speak("INSERT OFF") # FIXME: Make this a sound
 
-    @neovim.autocmd('InsertCharPre', eval="v:char")
+    @neovim.autocmd('InsertCharPre', eval='[v:char, getpos(".")]')
     @requires_option(Options.SPEAK_KEYPRESSES)
-    def handle_insert_char(self, inserted):
-        row, col = self.vim.api.win_get_cursor(self.vim.current.window)
+    def handle_insert_char(self, data):
+        inserted, pos = data
+        _, row, col, _ = pos
+        #row, col = self.vim.api.win_get_cursor(self.vim.current.window)
         line = self.vim.current.line
 
-        self.speak(inserted)
+        self.literal_stack.append(inserted)
 
         if inserted == ' ':
+            self.flush_stack()
             # Inserted a space, say the last inserted word
             start_of_word = line.rfind(' ', 0, len(line) - 1)
             word = line[start_of_word + 1:col]
             self.speak(word)
+        elif len(self.literal_stack) > 4:
+            self.flush_stack()
