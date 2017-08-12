@@ -11,6 +11,10 @@ class Main(object):
         self.last_spoken = ""
         self.current_process = None
 
+        self.interpret_generic = True
+        self.interpret_haskell_infix = False
+        self.speak_punctuation = False
+
     def get_indent_level(self, line: str) -> int:
         """
         Given a line, return the indentation level
@@ -42,11 +46,9 @@ class Main(object):
         """
         Runs TTS on the supplied string
         """
-        speed = self.speed
-        speed += 100 * self.get_indent_level(txt)  # TODO - multiline support
-        if self.current_process:
-            self.current_process.kill()
-        subprocess.Popen(["say", "-r", str(speed), self.mutate_speech(txt)])
+        # if self.current_process:
+        #     self.current_process.kill()
+        subprocess.run(["say", "-r", str(self.speed), self.mutate_speech(txt)])
 
     @neovim.command('SpeakLine')
     def speak_line(self):
@@ -72,22 +74,61 @@ class Main(object):
             return "-"
 
     def mutate_speech(self, txt):
-        # FIXME: Might be a hack, couldn't get it to read the punctuation
-
-        conversions = { ".": " fullstop ",
-                  ":": " colon ",
-                  "(": " open paren ",
-                  ")": " close paren ",
-                  "[": " open bracket ",
-                  "]": " close bracket ",
-                  "{": " open curly ",
-                  "}": " close curly "
-                  }
+        punctuation = { ".": "dot"
+                      , ":": "colon"
+                      , "(": "open paren"
+                      , ")": "close paren"
+                      , "[": "open bracket"
+                      , "]": "close bracket"
+                      , "{": "open curly"
+                      , "}": "close curly"
+                      }
         
-        for (target, replacement) in conversions.items():
-            txt = txt.replace(target, replacement)
+        generic = { "->": "stab"
+                  , ">=>": "fish"
+                  , "<=>": "spaceship"
+                  , "=>": "fat arrow"
+                  , "===": "triple equals"
+                  , "++": "increment"
+                  , "--": "decrement"
+                  , "+=": "add with"
+                  , "-=": "subtract with"
+                  , "/=": "divide with"
+                  , "*=": "multiply with"
+                  }
 
-        return txt
+        haskell = { "." : "compose"
+                  , "&" : "thread"
+                  , "$": "apply"
+                  , "->": "yields"
+                  , "<-": "bind"
+                  , "<$>": "effmap"
+                  , "<$": "const map"
+                  , "<*>": "applic"
+                  , "*>": "sequence right"
+                  , "<*": "sequence left"
+                  , ">>=": "and then"
+                  , "=<<": "bind"
+                  , ">=>": "kleisli compose"
+                  , ">>": "sequence right"
+                  , "<<": "sequence left"
+                  }
+    
+        pitch_mod = self.get_indent_level(txt)  # TODO - multiline support
+
+        if self.interpret_haskell_infix:
+            for (target, replacement) in haskell.items():
+                txt = txt.replace(target, f" {replacement} ")
+
+        if self.interpret_generic:
+            for (target, replacement) in generic.items():
+                txt = txt.replace(target, f" {replacement} ")
+
+        if self.speak_punctuation:
+            for (target, replacement) in punctuation.items():
+                txt = txt.replace(target, f" {replacement} ")
+
+        return f"[[ pbas +{pitch_mod}]]" + txt
         
     @neovim.autocmd('CursorMoved')
     def handle_cursor_moved(self):
