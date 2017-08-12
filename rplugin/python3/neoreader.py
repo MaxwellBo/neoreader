@@ -228,6 +228,7 @@ class Main(object):
         if self.get_option(self.Options.SPEAK_KEYPRESSES):
             self.speak(word, literal=True, speed=700)
 
+
     @neovim.autocmd('InsertCharPre', eval='[v:char, getpos(".")]')
     def handle_insert_char(self, data):
         inserted, pos = data
@@ -247,6 +248,6 @@ class Main(object):
                 start_of_word = line.rfind(' ', 0, len(line) - 1)
                 word = line[start_of_word + 1:col]
                 self.speak(word, brackets=True, generic=False, haskell=False, stop=False)
-        elif len(self.literal_stack) > 4:
+        elif len(self.literal_stack) > 3:
             self.flush_stack()
 
