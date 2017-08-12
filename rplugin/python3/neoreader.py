@@ -1,42 +1,45 @@
 import neovim
 import subprocess
 from typing import List
+import enum
+import functools
 
 
-def var(name: str, default=''):
-    """
-    Helper function to create a property for a NeoVim variable with default.
-    """
-    @property
-    def inner(self):
-        val = self.vim.vars.get(name)
-        if val is None:
-            return default
-        return val
+def requires_option(option):
+    def decorator(fn):
+        @functools.wraps(fn)
+        def inner(self, *args, **kwargs):
+            if self.get_option(option):
+                return fn(self, *args, **kwargs)
 
-    @inner.setter
-    def inner(self, new):
-        return self.vim.api.set_var(name, new)
+        return inner
 
-    return inner
+    return decorator
 
 
 @neovim.plugin
 class Main(object):
+    class Options(enum.Enum):
+        INTERPRET_GENERIC = ('interpret_generic', True)
+        INTERPRET_HASKELL_INFIX = ('interpret_haskell_infix', False)
+        SPEAK_PUNCTUATION = ('speak_punctuation', False)
+        SPEAK_KEYPRESSES = ('speak_keypresses', False)
+        SPEAK_MODE_TRANSITIONS = ('speak_mode_transitions', False)
+        AUTO_SPEAK_LINE = ('auto_speak_line', True)
+        PITCH_FACTOR = ('pitch_factor', 1)
+        SPEED = ('speak_speed', 350)
+
     def __init__(self, vim):
         self.vim = vim
         self.last_spoken = ""
         self.current_process = None
 
-    # Configuration
-    interpret_generic = var('interpret_generic', True)
-    interpret_haskell_infix = var('interpret_haskell_infix', False)
-    speak_punctuation = var('speak_punctuation', False)
-    speak_keypresses = var('speak_keypresses', False)
-    speak_mode_transitions = var('speak_mode_transitions', False)
-    auto_speak_line = var('auto_speak_line', True)
-    pitch_factor = var('pitch_factor', 1)
-    speed = var('speak_speed', 350)
+    def get_option(self, option):
+        name, default = option.value
+        val = self.vim.vars.get(name)
+        if val is None:
+            return default
+        return val
 
     def get_indent_level(self, line: str) -> int:
         """
@@ -71,7 +74,7 @@ class Main(object):
         """
         # if self.current_process:
         #     self.current_process.kill()
-        subprocess.run(["say", "-r", str(self.speed), self.mutate_speech(txt)])
+        subprocess.run(["say", "-r", str(self.get_option(self.Options.SPEED)), self.mutate_speech(txt)])
 
     @neovim.command('SpeakLine')
     def speak_line(self):
@@ -135,48 +138,43 @@ class Main(object):
                   , "<<": "sequence left"
                   }
     
-        pitch_mod = self.get_indent_level(txt) // self.pitch_factor  # TODO - multiline support
+        pitch_mod = self.get_indent_level(txt) // self.get_option(self.Options.PITCH_FACTOR)
 
-        if self.interpret_haskell_infix:
+        if self.get_option(self.Options.INTERPRET_HASKELL_INFIX):
             for (target, replacement) in haskell.items():
                 txt = txt.replace(target, f" {replacement} ")
 
-        if self.interpret_generic:
+        if self.get_option(self.Options.INTERPRET_GENERIC):
             for (target, replacement) in generic.items():
                 txt = txt.replace(target, f" {replacement} ")
 
-        if self.speak_punctuation:
+        if self.get_option(self.Options.SPEAK_PUNCTUATION):
             for (target, replacement) in punctuation.items():
                 txt = txt.replace(target, f" {replacement} ")
 
         return f"[[ pbas +{pitch_mod}]]" + txt
         
     @neovim.autocmd('CursorMoved')
+    @requires_option(Options.AUTO_SPEAK_LINE)
     def handle_cursor_moved(self):
-        if self.auto_speak_line:
-            self.speak_line()
+        self.speak_line()
 
     @neovim.autocmd('InsertEnter')
+    @requires_option(Options.SPEAK_MODE_TRANSITIONS)
     def handle_insert_enter(self):
-        if self.speak_mode_transitions:
-            self.speak("INSERT ON") # FIXME: Make this a sound - see timeyyy/orchestra.nvim
+        self.speak("INSERT ON") # FIXME: Make this a sound - see timeyyy/orchestra.nvim
 
     @neovim.autocmd('InsertLeave')
+    @requires_option(Options.SPEAK_MODE_TRANSITIONS)
     def handle_insert_leave(self): 
-        if self.speak_mode_transitions:
-            self.speak("INSERT OFF") # FIXME: Make this a sound
-
-    # FIXME - Remove this? (As we now have  let g:speak_speed = 400)
-    @neovim.command("SpeakSpeed", count=1)
-    def set_speed(self, speed):
-        self.speed = int(speed)
+        self.speak("INSERT OFF") # FIXME: Make this a sound
 
     @neovim.autocmd('InsertCharPre')
+    @requires_option(Options.SPEAK_KEYPRESSES)
     def handle_insert_char(self):
-        if self.speak_keypresses:
-            row, col = self.vim.api.win_get_cursor(self.vim.current.window)
-            line = self.vim.current.line
+        row, col = self.vim.api.win_get_cursor(self.vim.current.window)
+        line = self.vim.current.line
 
-            inserted = line[col - 1]
+        inserted = line[col - 1]
 
-            self.speak(inserted)
+        self.speak(inserted)
