@@ -109,7 +109,7 @@ class Main(object):
                   , "<*": "sequence left"
                   , ">>=": "and then"
                   , "=<<": "bind"
-                  , ">=>": "kleisli compose"
+                  , "<=<": "kleisli compose"
                   , ">>": "sequence right"
                   , "<<": "sequence left"
                   }
