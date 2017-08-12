@@ -187,8 +187,29 @@ class Main(object):
 
         subprocess.run(["say", "-r", str(speed), txt])
         
+    @neovim.command('SpeakLine')
+    def cmd_speak_line(self):
+        current = self.vim.current.line
+        self.speak(current, newline=True)
 
-    def speak_line(self):
+    @neovim.command('SpeakLineDetail')
+    def cmd_speak_line_detail(self):
+        current = self.vim.current.line
+        self.speak(current, brackets=True, generic=False, haskell=False, speed=self.get_option(self.Options.SPEED) - 100)
+
+    @neovim.command('SpeakRange', range=True)
+    def cmd_speak_range(self, line_range):
+        for i in self.get_current_selection():
+            self.speak(i)
+
+    @neovim.command('SpeakRangeDetail', range=True)
+    def cmd_speak_range_detail(self, line_range):
+        for i in self.get_current_selection():
+            self.speak(i, brackets=True, generic=False, haskell=False, speed=self.get_option(self.Options.SPEED) - 100)
+
+    @neovim.autocmd('CursorMoved')
+    @requires_option(Options.AUTO_SPEAK_LINE)
+    def handle_cursor_moved(self):
         current = self.vim.current.line
         if current == self.last_spoken:
             # FIXME: Dirty hack. Should rather figure out whether changing lines
@@ -196,21 +217,6 @@ class Main(object):
         else:
             self.last_spoken = current
             self.speak(current, newline=True)
-
-    @neovim.command('SpeakRange', range=True)
-    def speak_range(self, line_range):
-        for i in self.get_current_selection():
-            self.speak(i)
-
-    @neovim.command('SpeakRangeDetail', range=True)
-    def speak_range_detail(self, line_range):
-        for i in self.get_current_selection():
-            self.speak(i, brackets=True, generic=False, haskell=False, speed=self.get_option(self.Options.SPEED) - 100)
-
-    @neovim.autocmd('CursorMoved')
-    @requires_option(Options.AUTO_SPEAK_LINE)
-    def handle_cursor_moved(self):
-        self.speak_line()
 
     @neovim.autocmd('InsertEnter')
     @requires_option(Options.SPEAK_MODE_TRANSITIONS)
