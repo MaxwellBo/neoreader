@@ -239,7 +239,7 @@ class Main(object):
         for i in self.get_current_selection():
             self.speak(i, brackets=True, generic=False, haskell=False, speed=self.get_option(self.Options.SPEED) - 100)
 
-    @neovim.command('ExplainRange', range=True)
+    @neovim.command('SpeakRangeExplain', range=True)
     def cmd_explain_range(self, line_range):
         lines = self.get_current_selection()
         code = "\n".join(lines)
