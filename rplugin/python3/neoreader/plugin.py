@@ -59,6 +59,7 @@ HASKELL_BIN_OPS =\
     , "<=<": "kleisli compose"
     , ">>": "sequence right"
     , "<<": "sequence left"
+    , "()": "unit"
     , "::": "of type"
     , ":": "appended to"
     , "&": "thread"
