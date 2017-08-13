@@ -301,7 +301,7 @@ class PrettyReader(NodeVisitor):
         return str(node.n)
 
     def visit_Str(self, node):
-        return "TODO"
+        return node.s
 
     def visit_FormattedValue(self, node):
         return "TODO"
@@ -313,7 +313,7 @@ class PrettyReader(NodeVisitor):
         return "TODO"
 
     def visit_NameConstant(self, node):
-        return "TODO"
+        return str(node.value)
 
     def visit_Ellipsis(self, node):
         return "Ellipsis"
@@ -482,7 +482,7 @@ class PrettyReader(NodeVisitor):
         return f"{len(node.args)} arguments: {self.visit_list(node.args)}"
     
     def visit_arg(self, node):
-        return f"{node.arg} of type {self.visit(node.annotation)}"
+        return node.arg + (f" of type {self.visit(node.annotation)}" if node.annotation else "")
 
     def visit_excepthandler(self, node):
         return "TODO"
@@ -502,6 +502,7 @@ if __name__ == "__main__":
 class SomeClass(object):
     def add(x: int, y: int) -> int:
         x = [ i + 1 for i in range(1, 10) if i % 2 == 0 ]
+        ("hello", True)
         return x + y
     """
 
