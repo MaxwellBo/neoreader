@@ -86,7 +86,7 @@ class Main(object):
         SPEAK_COMPLETIONS = ('speak_completions', False)
         AUTO_SPEAK_LINE = ('auto_speak_line', True)
         INDENT_STATUS = ('speak_indent', False)
-        PITCH_FACTOR = ('pitch_factor', 1)
+        PITCH_MULTIPLIER = ('pitch_multiplier', 10)
         SPEED = ('speak_speed', 350)
         USE_ESPEAK = ('use_espeak', False)
 
@@ -183,7 +183,7 @@ class Main(object):
             indent_status = self.get_option(self.Options.INDENT_STATUS)
 
         indent_level = self.get_indent_level(txt) 
-        pitch_mod = indent_level // self.get_option(self.Options.PITCH_FACTOR)
+        pitch_mod = indent_level * self.get_option(self.Options.PITCH_MULTIPLIER)
 
         if literal:
             self.call_say(txt, speed=speed, literal=literal)
