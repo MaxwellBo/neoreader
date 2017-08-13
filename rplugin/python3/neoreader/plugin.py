@@ -249,8 +249,16 @@ class Main(object):
         current = self.vim.current.line.strip()
 
         explained = self.explain(current, line=False)
-
-        self.speak(explained, stop=True, standard=False, speed=200)
+     
+        self.speak(
+            explained,
+            stop=True,
+            standard=False,
+            brackets=False,
+            haskell=False,
+            indent_status=False,
+            speed=200
+        )
 
     @neovim.command('SpeakRange', range=True)
     def cmd_speak_range(self, line_range):
@@ -277,7 +285,15 @@ class Main(object):
 
         explained = self.explain(code, line=True)
 
-        self.speak(explained, stop=True, standard=False, speed=200)
+        self.speak(
+            explained,
+            stop=True,
+            standard=False,
+            brackets=False,
+            haskell=False,
+            indent_status=False,
+            speed=200
+        )
 
     @neovim.autocmd('CursorMoved')
     @requires_option(Options.AUTO_SPEAK_LINE)
