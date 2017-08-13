@@ -127,13 +127,12 @@ class PrettyReader(NodeVisitor):
         return summary
 
     def visit_If(self, node):
-        summary = (
-            "an if block"
-            f", using {self.visit(node.test)} as the test"
-            f", with a true branch of {self.visit_list(node.body)}"
-            f", and an false branch of {self.visit_list(node.orelse)}"
-            # TODO: orelse
-        )
+        false_branch = self.visit_list(node.orelse)
+
+        summary = "an if block"\
+            + f", using {self.visit(node.test)} as the test"\
+            + f", with a true branch of {self.visit_list(node.body)}"\
+            + (f", and an false branch of {false_branch}" if len(false_branch) != 0 else "")
         return summary
 
     def visit_With(self, node, is_async=False):
@@ -316,7 +315,7 @@ class PrettyReader(NodeVisitor):
         return str(node.value)
 
     def visit_Ellipsis(self, node):
-        return "Ellipsis"
+        return "ellipsis"
 
     def visit_Constant(self, node):
         return self.visit(node.value)
@@ -328,7 +327,7 @@ class PrettyReader(NodeVisitor):
         return f"the slice {self.visit(node.slice)} of {self.visit(node.value)}"
 
     def visit_Starred(self, node):
-        return "TODO"
+        return f"splat {self.visit(node.value)}"
 
     def visit_Name(self, node):
         return node.id
@@ -503,6 +502,10 @@ class SomeClass(object):
     def add(x: int, y: int) -> int:
         x = [ i + 1 for i in range(1, 10) if i % 2 == 0 ]
         ("hello", True)
+
+        if True:
+            return False
+
         return x + y
     """
 
