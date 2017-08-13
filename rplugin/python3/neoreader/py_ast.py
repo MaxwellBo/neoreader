@@ -1,4 +1,4 @@
-from ast import parse, walk, iter_fields, dump, NodeVisitor
+from ast import parse, walk, iter_fields, dump, NodeVisitor, get_docstring
 import sys
 
 
@@ -67,10 +67,15 @@ class PrettyReader(NodeVisitor):
 
 
     def visit_FunctionDef(self, node, is_async=False):
+        docstring = get_docstring(node, True)
+        body = node.body
+        if docstring:
+            body = body[1:]  # Don't mention it
         summary = ""\
             + f"{interpret_async(is_async)} function called {node.name}"\
             + f", which has {self.visit(node.args)}"\
             + (f", and returns a value of {self.visit(node.returns)}" if node.returns else "")\
+            + (f", with the docstring of {docstring}" if docstring else "")\
             + f", with a body of {self.visit(node.body)}"
 
         return summary
@@ -181,7 +186,7 @@ class PrettyReader(NodeVisitor):
         return "TODO"
 
     def visit_Expr(self, node):
-        return "TODO"
+        return self.visit(node.value)
 
     def visit_Pass(self, node):
         return "Pass"
