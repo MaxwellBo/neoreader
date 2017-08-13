@@ -322,7 +322,7 @@ class PrettyReader(NodeVisitor):
         return self.visit(node.value)
     
     def visit_Attribute(self, node):
-        return f"the attribute {self.visit(node.attr)} of {self.visit(node.value)}"
+        return f"the attribute {node.attr} of {self.visit(node.value)}"
 
     def visit_Subscript(self, node):
         return f"the slice {self.visit(node.slice)} of {self.visit(node.value)}"
