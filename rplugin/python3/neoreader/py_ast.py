@@ -3,7 +3,7 @@ import sys
 
 
 def interpret_async(is_async):
-    return "An async" if is_async else "A"
+    return "an async" if is_async else "a"
 
 
 class PrettyReader(NodeVisitor):
@@ -80,7 +80,7 @@ class PrettyReader(NodeVisitor):
 
     def visit_ClassDef(self, node):
         summary = (
-            f"A class called {node.name}"
+            f"a class called {node.name}"
             f", which extends {self.visit_list(node.bases)}"
             f", and defines {self.visit_list(node.body)}"
         )
@@ -88,18 +88,18 @@ class PrettyReader(NodeVisitor):
 
     def visit_Return(self, node):
         if node.value:
-            return f"A return statement returning {self.visit(node.value)}"
+            return f"a return statement returning {self.visit(node.value)}"
         else:
-            return "A return statement"
+            return "a return statement"
 
     def visit_Delete(self, node):
-        return f"A delete statement, deleting {self.visit_list(node.targets)}"
+        return f"a delete statement, deleting {self.visit_list(node.targets)}"
 
     def visit_Assign(self, node):
-        return f"An assignment of {self.visit(node.value)} to {self.visit_list(node.targets)}"
+        return f"an assignment of {self.visit(node.value)} to {self.visit_list(node.targets)}"
 
     def visit_AugAssign(self, node):
-        return f"An assignment of {self.visit(node.value)} to {self.visit(node.target)} using {self.visit(node.operator)}"
+        return f"an assignment of {self.visit(node.value)} to {self.visit(node.target)} using {self.visit(node.operator)}"
 
     def visit_AnnAssign(self, node):
         return "TODO"
@@ -119,7 +119,7 @@ class PrettyReader(NodeVisitor):
 
     def visit_While(self, node):
         summary = (
-            "A while loop"
+            "a while loop"
             f", using {self.visit(node.test)} as the test"
             f", with a body of {self.visit_list(node.body)}"
             # TODO: orelse
@@ -128,7 +128,7 @@ class PrettyReader(NodeVisitor):
 
     def visit_If(self, node):
         summary = (
-            "An if block"
+            "an if block"
             f", using {self.visit(node.test)} as the test"
             f", with a true branch of {self.visit_list(node.body)}"
             f", and an false branch of {self.visit_list(node.orelse)}"
@@ -150,7 +150,7 @@ class PrettyReader(NodeVisitor):
 
     def visit_Raise(self, node):
         summary = ""\
-            + "A raise statement"\
+            + "a raise statement"\
             + (f", raising an exception {self.visit(node.exc)}" if node.exc else "")\
             + (f", with a cause of {self.visit(node.cause)}" if node.cause else "")
 
@@ -158,7 +158,7 @@ class PrettyReader(NodeVisitor):
     
     def visit_Try(self, node):
         summary = (
-            "A try block"
+            "a try block"
             f", using {self.visit_list(node.handlers)} as the exception handlers"
             f", with a body of {self.visit_list(node.body)}"
             f",and a final body of {self.visit_list(node.finalbody)}"
@@ -238,53 +238,53 @@ class PrettyReader(NodeVisitor):
         return f"{self.visit(node.op)} {self.visit(node.operand)}"
 
     def visit_Lambda(self, node):
-        return f"An anonymous function taking {self.visit(node.arguments)} and returning {self.visit(node.body)}"
+        return f"an anonymous function taking {self.visit(node.arguments)} and returning {self.visit(node.body)}"
 
     def visit_IfExpr(self, node):
-        return f"If {self.visit(node.test)} then {self.visit(node.body)} else {self.visit(node.orelse)}"
+        return f"if {self.visit(node.test)} then {self.visit(node.body)} else {self.visit(node.orelse)}"
 
     def visit_Dict(self, node):
-        return f"A dict of keys {self.visit_list(node.keys)}, and values {self.visit_list(node.values)}"
+        return f"a dict of keys {self.visit_list(node.keys)}, and values {self.visit_list(node.values)}"
 
     def visit_Set(self, node):
-        return f"A set of keys {self.visit_list(node.elts)}"
+        return f"a set of keys {self.visit_list(node.elts)}"
 
     def visit_ListComp(self, node):
         summary = (
-            f"A list comprehension of {self.visit(node.elt)}"
+            f"a list comprehension of {self.visit(node.elt)}"
             f", from {self.visit_list(node.generators)}"
         )
         return summary
 
     def visit_SetComp(self, node):
         summary = (
-            f"A set comprehension of {self.visit(node.elt)}"
+            f"a set comprehension of {self.visit(node.elt)}"
             f", from {self.visit_list(node.generators)}"
         )
         return summary
 
     def visit_DictComp(self, node):
         summary = (
-            f"A dict comprehension of the {self.visit(node.key)} {self.visit(node.value)} key-value pair"
+            f"a dict comprehension of the {self.visit(node.key)} {self.visit(node.value)} key-value pair"
             f", from {self.visit_list(node.generators)}"
         )
         return summary
 
     def visit_GeneratorExp(self, node):
         summary = (
-            f"A generator expression of {self.visit(node.elt)}"
+            f"a generator expression of {self.visit(node.elt)}"
             f", from {self.visit_list(node.generators)}"
         )
         return summary
 
     def visit_Await(self, node):
-        return f"Await {self.visit(node.value)}"
+        return f"await {self.visit(node.value)}"
 
     def visit_Yield(self, node):
-        return f"Yield {self.visit(node.value) if node.value else ''}"
+        return f"yield {self.visit(node.value) if node.value else ''}"
 
     def visit_YieldFrom(self, node):
-        return f"Yield from {self.visit(node.value)}"
+        return f"yield from {self.visit(node.value)}"
 
     def visit_Compare(self, node):
         return "TODO"
@@ -318,10 +318,10 @@ class PrettyReader(NodeVisitor):
         return self.visit(node.value)
     
     def visit_Attribute(self, node):
-        return f"The attribute {self.visit(node.attr)} of {self.visit(node.value)}"
+        return f"the attribute {self.visit(node.attr)} of {self.visit(node.value)}"
 
     def visit_Subscript(self, node):
-        return f"The slice {self.visit(node.slice)} of {self.visit(node.value)}"
+        return f"the slice {self.visit(node.slice)} of {self.visit(node.value)}"
 
     def visit_Starred(self, node):
         return "TODO"
@@ -330,10 +330,10 @@ class PrettyReader(NodeVisitor):
         return node.id
 
     def visit_List(self, node):
-        return f"A list of {self.visit_list(node.elts)}"
+        return f"a list of {self.visit_list(node.elts)}"
 
     def visit_Tuple(self, node):
-        return f"A tuple of {self.visit_list(node.elts)}"
+        return f"a tuple of {self.visit_list(node.elts)}"
 
     """
     slice = Slice(expr? lower, expr? upper, expr? step)
@@ -352,7 +352,7 @@ class PrettyReader(NodeVisitor):
         return "TODO"
 
     def visit_Index(self, node):
-        return f"An index of {self.visit(node.value)}"
+        return f"an index of {self.visit(node.value)}"
 
     def visit_And(self, node):
         return "and"
