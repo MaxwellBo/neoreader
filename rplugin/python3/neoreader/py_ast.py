@@ -318,7 +318,7 @@ class PrettyReader(NodeVisitor):
         return "TODO"
 
     def visit_Name(self, node):
-        return "TODO"
+        return node.id
 
     def visit_List(self, node):
         return f"A list of {self.visit_list(node.elts)}"
@@ -327,9 +327,29 @@ class PrettyReader(NodeVisitor):
         return f"A tuple of {self.visit_list(node.elts)}"
 
     """
-    TODO
+    slice = Slice(expr? lower, expr? upper, expr? step)
+        | ExtSlice(slice* dims)
+        | Index(expr value)
     """
 
+    def visit_Slice(self, node):
+        summary = "A slice"\
+            + (f"from {self.visit(node.lower)}" if node.lower else "")\
+            + (f"to {self.visit(node.upper)}" if node.upper else "")\
+            + (f"with stepping {self.visit(node.step)}" if node.step else "")
+        return summary
+
+    def visit_ExtSlice(self, node):
+        return "TODO"
+
+    def visit_Index(self, node):
+        return f"An index of {self.visit(node.value)}"
+
+    def visit_And(self, node):
+        return "and"
+
+    def visit_Or(self, node):
+        return "or"
 
     def visit_Add(self, node):
         return "plus"
@@ -412,14 +432,56 @@ class PrettyReader(NodeVisitor):
     def visit_NotIn(self, node):
         return "not in"
 
+    """
+    comprehension = (expr target, expr iter, expr* ifs, int is_async)
+
+    excepthandler = ExceptHandler(expr? type, identifier? name, stmt* body)
+                    attributes (int lineno, int col_offset)
+
+    arguments = (arg* args, arg? vararg, arg* kwonlyargs, expr* kw_defaults,
+                 arg? kwarg, expr* defaults)
+
+    arg = (identifier arg, expr? annotation)
+           attributes (int lineno, int col_offset)
+
+    -- keyword arguments supplied to call (NULL identifier for **kwargs)
+    keyword = (identifier? arg, expr value)
+
+    -- import name with optional 'as' alias.
+    alias = (identifier name, identifier? asname)
+
+    withitem = (expr context_expr, expr? optional_vars)
+    """
+
+    def visit_comprehension(self, node):
+        summary = (
+            f"{'asynchronously comprehending' if node.is_async else ''}"
+            f", using {self.visit(node.target)} as an iterator"
+            f", looping through {self.visit(node.iter)}"
+            f", with guards of {self.visit_list(node.ifs)}"
+        )
+        return summary
+
+    def visit_excepthandler(self, node):
+        return "TODO"
+
     def visit_arguments(self, node):
         return f"{len(node.args)} arguments: {self.visit_list(node.args)}"
     
     def visit_arg(self, node):
         return f"{node.arg} of type {self.visit(node.annotation)}"
 
-    def visit_Name(self, node):
-        return node.id
+    def visit_excepthandler(self, node):
+        return "TODO"
+    
+    def visit_keyword(self, node):
+        return "TODO"
+
+    def visit_alias(self, node):
+        return "TODO"
+
+    def visit_withitem(self, node):
+        return "TODO"
 
 
 if __name__ == "__main__":
