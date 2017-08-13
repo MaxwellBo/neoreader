@@ -83,6 +83,7 @@ class Main(object):
         SPEAK_KEYPRESSES = ('speak_keypresses', False)
         SPEAK_WORDS = ('speak_words', True)
         SPEAK_MODE_TRANSITIONS = ('speak_mode_transitions', False)
+        SPEAK_COMPLETIONS = ('speak_completions', False)
         AUTO_SPEAK_LINE = ('auto_speak_line', True)
         INDENT_STATUS = ('speak_indent', False)
         PITCH_FACTOR = ('pitch_factor', 1)
@@ -282,3 +283,13 @@ class Main(object):
         elif len(self.literal_stack) > 3:
             self.flush_stack()
 
+    @neovim.autocmd('CompleteDone', eval='v:completed_item')
+    @requires_option(Options.SPEAK_COMPLETIONS)
+    def handle_complete_done(self, item):
+        if not item:
+            return
+
+        if isinstance(item, dict):
+            item = item['word']
+
+        self.speak(item)
