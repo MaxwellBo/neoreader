@@ -287,7 +287,11 @@ class PrettyReader(NodeVisitor):
         return f"yield from {self.visit(node.value)}"
 
     def visit_Compare(self, node):
-        return "TODO"
+        left = self.visit(node.left)
+        ops = map(self.visit, node.ops)
+        comp = map(self.visit, node.comparators)
+
+        return left + ' ' + ' '.join([f'{op} {val}' for op, val in zip(ops, comp)])
 
     def visit_Call(self, node):
         return f"{self.visit(node.func)} called with {self.visit_list(node.args)}" 
