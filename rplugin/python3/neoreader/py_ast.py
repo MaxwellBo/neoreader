@@ -1,4 +1,6 @@
 from ast import parse, walk, iter_fields, dump, NodeVisitor
+import sys
+
 
 def interpret_async(is_async):
     return "An async" if is_async else "A"
@@ -51,6 +53,11 @@ class PrettyReader(NodeVisitor):
         -- BoolOp() can use left & right?
     """
 
+    def visit_Module(self, node):
+        return self.visit_list(node.body)
+
+    def visit_Expression(self, node):
+        return self.visit(node.body)
 
     def visit_list(self, xs):
         return ", ".join([self.visit(i) for i in xs ])
@@ -74,7 +81,6 @@ class PrettyReader(NodeVisitor):
             f", which extends {self.visit_list(node.bases)}"
             f", and defines {self.visit_list(node.body)}"
         )
-        print(summary)
         return summary
 
     def visit_Return(self, node):
@@ -492,8 +498,13 @@ class SomeClass(object):
         return x + y
     """
 
-    t = parse(raw)
-    print(dump(t))
-
-    PrettyReader().visit(t)
+    if len(sys.argv) < 2:
+        print("Need filename")
+        t = parse(raw)
+        print(dump(t))
+        print(PrettyReader().visit(t))
+    else:
+        file_name = sys.argv[1]
+        with open(file_name, 'r') as f:
+            code = f.read()
 
