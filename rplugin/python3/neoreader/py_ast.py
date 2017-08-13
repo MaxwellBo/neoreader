@@ -76,7 +76,7 @@ class PrettyReader(NodeVisitor):
             + f", which has {self.visit(node.args)}"\
             + (f", and returns a value of {self.visit(node.returns)}" if node.returns else "")\
             + (f", with the docstring of {docstring}" if docstring else "")\
-            + f", with a body of {self.visit(node.body)}"
+            + f", with a body of {self.visit(body)}"
 
         return summary
 
