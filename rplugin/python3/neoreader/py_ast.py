@@ -60,7 +60,10 @@ class PrettyReader(NodeVisitor):
         return self.visit(node.body)
 
     def visit_list(self, xs):
-        return ", ".join([self.visit(i) for i in xs ])
+        if len(xs) <= 1:
+            return ", ".join([self.visit(i) for i in xs ])
+        else:
+            return ", ".join([self.visit(i) for i in xs[:-1]]) + f" and {self.visit(xs[-1])}"
 
 
     def visit_FunctionDef(self, node, is_async=False):
