@@ -3,6 +3,10 @@ import subprocess
 from typing import List
 import enum
 import functools
+import ast
+
+from .py_ast import PrettyReader
+
 
 COMPARISONS =\
     { " < ": "less than"
@@ -160,6 +164,7 @@ class Main(object):
         brackets=None,
         generic=None,
         haskell=None,
+        standard=True,
         speed=None,
         indent_status=None,
         newline=False,
@@ -196,8 +201,9 @@ class Main(object):
                 for (target, replacement) in GENERIC_BIN_OPS.items():
                     txt = txt.replace(target, f" {replacement} ")
 
-            for (target, replacement) in { **STANDARD, **COMPARISONS }.items():
-                txt = txt.replace(target, f" {replacement} ")
+            if standard:
+                for (target, replacement) in { **STANDARD, **COMPARISONS }.items():
+                    txt = txt.replace(target, f" {replacement} ")
 
             if brackets:
                 for (target, replacement) in BRACKET_PAIRINGS.items():
@@ -232,6 +238,19 @@ class Main(object):
     def cmd_speak_range_detail(self, line_range):
         for i in self.get_current_selection():
             self.speak(i, brackets=True, generic=False, haskell=False, speed=self.get_option(self.Options.SPEED) - 100)
+
+    @neovim.command('ExplainRange', range=True)
+    def cmd_explain_range(self, line_range):
+        lines = self.get_current_selection()
+        code = "\n".join(lines)
+        try:
+            top_node = ast.parse(code)
+
+            explained = PrettyReader().visit(top_node)
+        except SyntaxError as e:
+            explained = f"Syntax Error: '{e.msg}' on line {e.lineno}, column {e.offset}"
+
+        self.speak(explained, stop=True, standard=False, speed=200)
 
     @neovim.autocmd('CursorMoved')
     @requires_option(Options.AUTO_SPEAK_LINE)
