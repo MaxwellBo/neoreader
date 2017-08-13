@@ -500,11 +500,12 @@ class SomeClass(object):
 
     if len(sys.argv) < 2:
         print("Need filename")
-        t = parse(raw)
-        print(dump(t))
-        print(PrettyReader().visit(t))
+        code = raw
     else:
         file_name = sys.argv[1]
         with open(file_name, 'r') as f:
             code = f.read()
+    t = parse(raw)
+    print(dump(t))
+    print(PrettyReader().visit(t))
 
