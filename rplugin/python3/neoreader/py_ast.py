@@ -313,7 +313,7 @@ class PrettyReader(NodeVisitor):
         return "TODO"
 
     def visit_NameConstant(self, node):
-        return "TODO"
+        return str(node.value)
 
     def visit_Ellipsis(self, node):
         return "Ellipsis"
@@ -512,7 +512,7 @@ class SomeClass(object):
         file_name = sys.argv[1]
         with open(file_name, 'r') as f:
             code = f.read()
-    t = parse(raw)
+    t = parse(code)
     print(dump(t))
     print(PrettyReader().visit(t))
 
