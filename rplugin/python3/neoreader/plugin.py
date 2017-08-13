@@ -218,6 +218,19 @@ class Main(object):
             if stop:
                 txt = f"{txt}, STOP."
             self.call_say(txt, speed=speed, pitch=pitch_mod)
+
+    def explain(self, code: str, line=True) -> str:
+        try:
+            top_node = ast.parse(code)
+
+            explained = PrettyReader().visit(top_node)
+        except SyntaxError as e:
+            explained = f"Syntax Error: '{e.msg}'"
+            if line:
+                explained += " on line {e.lineno},"
+            explained += " column {e.offset}"
+
+        return explained
         
     @neovim.command('SpeakLine')
     def cmd_speak_line(self):
@@ -228,6 +241,14 @@ class Main(object):
     def cmd_speak_line_detail(self):
         current = self.vim.current.line
         self.speak(current, brackets=True, generic=False, haskell=False, speed=self.get_option(self.Options.SPEED) - 100)
+
+    @neovim.command('SpeakLineExplain')
+    def cmd_speak_line_explain(self):
+        current = self.vim.current.line.strip()
+
+        explained = self.explain(current, line=False)
+
+        self.speak(explained, stop=True, standard=False, speed=200)
 
     @neovim.command('SpeakRange', range=True)
     def cmd_speak_range(self, line_range):
@@ -243,12 +264,8 @@ class Main(object):
     def cmd_explain_range(self, line_range):
         lines = self.get_current_selection()
         code = "\n".join(lines)
-        try:
-            top_node = ast.parse(code)
 
-            explained = PrettyReader().visit(top_node)
-        except SyntaxError as e:
-            explained = f"Syntax Error: '{e.msg}' on line {e.lineno}, column {e.offset}"
+        explained = self.explain(code, line=True)
 
         self.speak(explained, stop=True, standard=False, speed=200)
 
