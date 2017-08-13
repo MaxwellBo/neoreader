@@ -263,7 +263,15 @@ class Main(object):
     @neovim.command('SpeakRangeExplain', range=True)
     def cmd_explain_range(self, line_range):
         lines = self.get_current_selection()
-        code = "\n".join(lines)
+        new_first_line = lines[0].lstrip()
+        base_indent_level = len(lines[0]) - len(new_first_line)
+
+        new_lines = [
+            line[base_indent_level:]
+            for line in lines
+        ]
+
+        code = "\n".join(new_lines)
 
         explained = self.explain(code, line=True)
 
