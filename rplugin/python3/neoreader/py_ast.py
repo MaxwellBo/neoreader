@@ -285,7 +285,7 @@ class PrettyReader(NodeVisitor):
         # TODO: Optional keywords (node.keywords)
 
     def visit_Num(self, node):
-        return "TODO"
+        return str(node.n)
 
     def visit_Str(self, node):
         return "TODO"
@@ -455,8 +455,8 @@ class PrettyReader(NodeVisitor):
 
     def visit_comprehension(self, node):
         summary = (
-            f"{'asynchronously comprehending' if node.is_async else ''}"
-            f", using {self.visit(node.target)} as an iterator"
+            f"{'an async' if node.is_async else 'a'}"
+            f" generator using {self.visit(node.target)} as an iterator"
             f", looping through {self.visit(node.iter)}"
             f", with guards of {self.visit_list(node.ifs)}"
         )
@@ -488,6 +488,7 @@ if __name__ == "__main__":
     raw = """
 class SomeClass(object):
     def add(x: int, y: int) -> int:
+        x = [ i + 1 for i in range(1, 10) if i % 2 == 0 ]
         return x + y
     """
 
