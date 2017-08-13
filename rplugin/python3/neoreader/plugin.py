@@ -49,14 +49,9 @@ GENERIC_BIN_OPS =\
     }
 
 HASKELL_BIN_OPS =\
-    { ".": "compose"
-    , "&": "thread"
-    , "$": "apply"
-    , "->": "yields"
-    , "<-": "bind"
-    , "<$>": "effmap"
-    , "<$": "const map"
+    { "<$>": "effmap"
     , "<*>": "applic"
+    , "<$": "const map"
     , "*>": "sequence right"
     , "<*": "sequence left"
     , ">>=": "and then"
@@ -64,6 +59,13 @@ HASKELL_BIN_OPS =\
     , "<=<": "kleisli compose"
     , ">>": "sequence right"
     , "<<": "sequence left"
+    , "::": "of type"
+    , ":": "appended to"
+    , "&": "thread"
+    , "$": "apply"
+    , "<-": "bind"
+    , "->": "yields"
+    , ".": "compose"
     }
 
 def requires_option(option):
