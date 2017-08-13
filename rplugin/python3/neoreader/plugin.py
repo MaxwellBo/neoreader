@@ -86,7 +86,7 @@ class Main(object):
         SPEAK_COMPLETIONS = ('speak_completions', False)
         AUTO_SPEAK_LINE = ('auto_speak_line', True)
         INDENT_STATUS = ('speak_indent', False)
-        PITCH_MULTIPLIER = ('pitch_multiplier', 10)
+        PITCH_MULTIPLIER = ('pitch_multiplier', 1)
         SPEED = ('speak_speed', 350)
         USE_ESPEAK = ('use_espeak', False)
 
