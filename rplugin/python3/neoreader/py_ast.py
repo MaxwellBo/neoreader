@@ -242,7 +242,7 @@ class PrettyReader(NodeVisitor):
         return f"{self.visit(node.op)} {self.visit(node.operand)}"
 
     def visit_Lambda(self, node):
-        return f"an anonymous function taking {self.visit(node.arguments)} and returning {self.visit(node.body)}"
+        return f"an anonymous function taking {self.visit(node.args)} and returning {self.visit(node.body)}"
 
     def visit_IfExpr(self, node):
         return f"if {self.visit(node.test)} then {self.visit(node.body)} else {self.visit(node.orelse)}"
@@ -338,7 +338,10 @@ class PrettyReader(NodeVisitor):
         return node.id
 
     def visit_List(self, node):
-        return f"a list of {self.visit_list(node.elts)}"
+        if len(node.elts) == 0:
+            return "an empty list"
+        else:
+            return f"a list of {self.visit_list(node.elts)}"
 
     def visit_Tuple(self, node):
         return f"a tuple of {self.visit_list(node.elts)}"
