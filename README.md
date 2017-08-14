@@ -33,9 +33,15 @@ You may use macOS's Speech Synthesis API _OR_ [eSpeak](https://github.com/rhdunn
 
 For [vim-plug](https://github.com/junegunn/vim-plug)
 
+Add 
+
 ```
 Plug 'MaxwellBo/neoreader'
 ```
+
+to your configuration, and execute `:PlugInstall`.
+
+Execute `:UpdateRemotePlugins` and restart Neovim.
 
 ## Configuration
 
