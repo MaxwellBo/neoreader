@@ -31,9 +31,7 @@ You may use macOS's Speech Synthesis API _OR_ [eSpeak](https://github.com/rhdunn
 
 ## Installation
 
-For [vim-plug](https://github.com/junegunn/vim-plug)
-
-Add 
+For [vim-plug](https://github.com/junegunn/vim-plug), add 
 
 ```
 Plug 'MaxwellBo/neoreader'
