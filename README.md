@@ -62,3 +62,7 @@ let g:speak_speed = 350
 let g:use_espeak = 0
 ```
 
+## Contributors
+
+- [Lewis Bobbermen](https://github.com/lewisjb)
+- [Max Bo](https://github.com/MaxwellBo)
