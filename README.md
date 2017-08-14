@@ -17,7 +17,7 @@ is read as
 
 ## Requirements
 
-neoreader requires [Neovim](https://github.com/neovim/neovim) with `if\_python3`.
+neoreader requires [Neovim](https://github.com/neovim/neovim) with `if_python3`.
 If `:echo has("python3")` returns `1`, then you're fine; otherwise, see below.
 
 You can enable the Python 3 interface with `pip`:
@@ -62,3 +62,7 @@ let g:speak_speed = 350
 let g:use_espeak = 0
 ```
 
+## Contributors
+
+- [Lewis Bobbermen](https://github.com/lewisjb)
+- [Max Bo](https://github.com/MaxwellBo)
