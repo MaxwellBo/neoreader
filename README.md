@@ -17,10 +17,10 @@ is read as
 
 ## Requirements
 
-neoreader requires [https://github.com/neovim/neovim](Neovim) with `if\_python3`.
+neoreader requires [Neovim](https://github.com/neovim/neovim) with `if\_python3`.
 If `:echo has("python3")` returns `1`, then you're fine; otherwise, see below.
 
-You can enable the Python 3 interface with pip:
+You can enable the Python 3 interface with `pip`:
 
     pip3 install neovim
 
