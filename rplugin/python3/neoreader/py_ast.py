@@ -101,10 +101,10 @@ class PrettyReader(NodeVisitor):
         return f"a delete statement, deleting {self.visit_list(node.targets)}"
 
     def visit_Assign(self, node):
-        return f"ellvalue {self.visit_list(node.targets)} assigned {self.visit(node.value)}"
+        return f"L-value {self.visit_list(node.targets)} assigned {self.visit(node.value)}"
 
     def visit_AugAssign(self, node):
-        return f"ellvalue {self.visit(node.target)} augmented with {self.visit(node.operator)} and the value {self.visit(node.value)}"
+        return f"L-value {self.visit(node.target)} augmented with {self.visit(node.operator)} and the value {self.visit(node.value)}"
 
     def visit_AnnAssign(self, node):
         return "TODO"
