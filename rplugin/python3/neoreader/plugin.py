@@ -9,11 +9,13 @@ from .py_ast import PrettyReader
 
 
 COMPARISONS =\
-    { " < ": "less than"
-    , " > " : "greater than"
-    , " >= ": "greater than or equal to"
+    { " < "  : "less than"
+    , " > "  : "greater than"
+    , " >= " : "greater than or equal to"
     , " <= " : "less than or equal to"
     , " == " : "is equal to"
+    , " && " : "and"
+    , " || " : "or"
     }
 
 STANDARD =\
@@ -46,6 +48,7 @@ GENERIC_BIN_OPS =\
     , "-=": "subtract with"
     , "/=": "divide with"
     , "*=": "multiply with"
+    , "?:": "elvis"
     }
 
 HASKELL_BIN_OPS =\
