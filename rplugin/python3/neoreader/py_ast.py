@@ -7,6 +7,25 @@ def interpret_async(is_async):
 
 
 class PrettyReader(NodeVisitor):
+
+    def visit_list(self, xs):
+        if len(xs) <= 1:
+            return ", ".join([self.visit(i) for i in xs ])
+        else:
+            return ", ".join([self.visit(i) for i in xs[:-1]]) + f" and {self.visit(xs[-1])}"
+
+
+    """
+    mod = Module(stmt* body)
+        | Interactive(stmt* body)
+        | Expression(expr body)
+    """
+    def visit_Module(self, node):
+        return self.visit_list(node.body)
+
+    def visit_Expression(self, node):
+        return self.visit(node.body)
+
     """
     stmt = FunctionDef(identifier name, arguments args,
                     stmt* body, expr* decorator_list, expr? returns)
@@ -45,26 +64,7 @@ class PrettyReader(NodeVisitor):
         | Nonlocal(identifier* names)
         | Expr(expr value)
         | Pass | Break | Continue
-
-        -- XXX Jython will be different
-        -- col_offset is the byte offset in the utf8 string the parser uses
-        attributes (int lineno, int col_offset)
-
-        -- BoolOp() can use left & right?
     """
-
-    def visit_Module(self, node):
-        return self.visit_list(node.body)
-
-    def visit_Expression(self, node):
-        return self.visit(node.body)
-
-    def visit_list(self, xs):
-        if len(xs) <= 1:
-            return ", ".join([self.visit(i) for i in xs ])
-        else:
-            return ", ".join([self.visit(i) for i in xs[:-1]]) + f" and {self.visit(xs[-1])}"
-
 
     def visit_FunctionDef(self, node, is_async=False):
         docstring = get_docstring(node, True)
