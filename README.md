@@ -24,9 +24,9 @@ You can enable the Python 3 interface with `pip`:
 
     pip3 install neovim
 
-You must be using Python 3.6
+You must be using Python 3.6.
 
-You may use macOS's Speech Synthesis API _OR_ [eSpeak](https://github.com/rhdunn/espeak)
+You may use macOS's Speech Synthesis API _OR_ [eSpeak](https://github.com/rhdunn/espeak).
 
 
 ## Installation
