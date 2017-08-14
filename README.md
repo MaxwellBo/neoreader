@@ -33,7 +33,7 @@ You may use macOS's Speech Synthesis API _OR_ [eSpeak](https://github.com/rhdunn
 
 For [vim-plug](https://github.com/junegunn/vim-plug), add 
 
-```
+```vim
 Plug 'MaxwellBo/neoreader'
 ```
 
@@ -43,7 +43,7 @@ Execute `:UpdateRemotePlugins` and restart Neovim.
 
 ## Configuration
 
-```vimscript
+```vim
 nnoremap <Leader>q :SpeakLine<cr>
 nnoremap <Leader>w :SpeakLineDetail<cr>
 nnoremap <Leader>e :SpeakLineExplain<cr>
