@@ -3,7 +3,7 @@
 neoreader is a screenreader for Neovim. It supports:
 
 - generalised syntax rewrites, such as infix substitutions 
-  + `->` is read as "stab" if `interpret_generic` is enabled
+  + `->` is read as "stab" if `interpet_generic_infix` is enabled
 - language specific syntax rewrites
   + `->` is read as "yields" if `interpret_haskell_infix` is enabled
 - Python 3 specific semantic analysis for more intelligible reading
@@ -48,7 +48,7 @@ vnoremap <Leader>s :SpeakRangeDetail<cr>
 vnoremap <Leader>d :SpeakRangeExplain<cr>
 
 " defaults
-let g:interpret_generic = 1
+let g:interpet_generic_infix = 1
 let g:interpret_haskell_infix = 0
 let g:speak_brackets = 0
 let g:speak_keypresses = 0
