@@ -14,7 +14,12 @@ class PrettyReader(NodeVisitor):
         else:
             return ", ".join([self.visit(i) for i in xs[:-1]]) + f" and {self.visit(xs[-1])}"
 
-
+    def visit_optional_list(self, xs, format_string="{}"):
+        if len(xs) == 0:
+            return ""
+        else:
+            return format_string.format(self.visit_list(xs))
+        
     """
     mod = Module(stmt* body)
         | Interactive(stmt* body)
@@ -67,14 +72,15 @@ class PrettyReader(NodeVisitor):
     """
 
     def visit_FunctionDef(self, node, is_async=False):
-        docstring = get_docstring(node, True)
+        docstring = f"\"{get_docstring(node, True)}\""
         body = node.body
         if docstring:
             body = body[1:]  # Don't mention it
+
         summary = ""\
-            + f"{interpret_async(is_async)} function called {node.name}"\
-            + f", which has {self.visit(node.args)}"\
-            + (f", and returns a value of {self.visit(node.returns)}" if node.returns else "")\
+            + f"{interpret_async(is_async)} function called \"{node.name}\""\
+            + f", taking {self.visit(node.args)}"\
+            + (f", and returning a value of {self.visit(node.returns)}" if node.returns else "")\
             + (f", with the docstring of {docstring}" if docstring else "")\
             + f", with a body of {self.visit(body)}"
 
@@ -85,7 +91,7 @@ class PrettyReader(NodeVisitor):
 
     def visit_ClassDef(self, node):
         summary = (
-            f"a class called {node.name}"
+            f"a class called \"{node.name}\""
             f", which extends {self.visit_list(node.bases)}"
             f", and defines {self.visit_list(node.body)}"
         )
@@ -101,10 +107,10 @@ class PrettyReader(NodeVisitor):
         return f"a delete statement, deleting {self.visit_list(node.targets)}"
 
     def visit_Assign(self, node):
-        return f"L-value {self.visit_list(node.targets)} assigned {self.visit(node.value)}"
+        return f"an L-value {self.visit_list(node.targets)} assigned {self.visit(node.value)}"
 
     def visit_AugAssign(self, node):
-        return f"L-value {self.visit(node.target)} augmented with {self.visit(node.operator)} and the value {self.visit(node.value)}"
+        return f"an L-value {self.visit(node.target)} augmented with {self.visit(node.operator)} and the value {self.visit(node.value)}"
 
     def visit_AnnAssign(self, node):
         return "TODO"
@@ -135,7 +141,7 @@ class PrettyReader(NodeVisitor):
         false_branch = self.visit_list(node.orelse)
 
         summary = "an if block"\
-            + f", using {self.visit(node.test)} as the test"\
+            + f", testing {self.visit(node.test)}"\
             + f", with a true branch of {self.visit_list(node.body)}"\
             + (f", and an false branch of {false_branch}" if len(false_branch) != 0 else "")
         return summary
@@ -189,13 +195,13 @@ class PrettyReader(NodeVisitor):
         return self.visit(node.value)
 
     def visit_Pass(self, node):
-        return "Pass"
+        return "pass"
 
     def visit_Break(self, node):
-        return "Break"
+        return "break"
 
     def visit_Continue(self, node):
-        return "Continue"
+        return "continue"
 
     """
     expr = BoolOp(boolop op, expr* values)
@@ -242,7 +248,12 @@ class PrettyReader(NodeVisitor):
         return f"{self.visit(node.op)} {self.visit(node.operand)}"
 
     def visit_Lambda(self, node):
-        return f"an anonymous function taking {self.visit(node.args)} and returning {self.visit(node.body)}"
+        summary = (
+            f"an anonymous function taking {self.visit(node.args)}"
+            f", and returning {self.visit(node.body)}"
+        )
+
+        return summary
 
     def visit_IfExpr(self, node):
         return f"if {self.visit(node.test)} then {self.visit(node.body)} else {self.visit(node.orelse)}"
@@ -298,7 +309,8 @@ class PrettyReader(NodeVisitor):
         return left + ' ' + ' '.join([f'{op} {val}' for op, val in zip(ops, comp)])
 
     def visit_Call(self, node):
-        return f"{self.visit(node.func)} called with {self.visit_list(node.args)}" 
+        # XXX: Hack - forcing call to visit_arguments
+        return f"{self.visit(node.func)} called with {self.visit_arguments(node)}"
         # TODO: Optional keywords (node.keywords)
 
     def visit_Num(self, node):
@@ -326,7 +338,7 @@ class PrettyReader(NodeVisitor):
         return self.visit(node.value)
     
     def visit_Attribute(self, node):
-        return f"{self.visit(node.value)} DOT, {node.attr}'"
+        return f"{self.visit(node.value)} \"dot\" {node.attr}"
 
     def visit_Subscript(self, node):
         return f"the slice {self.visit(node.slice)} of {self.visit(node.value)}"
@@ -335,7 +347,7 @@ class PrettyReader(NodeVisitor):
         return f"splat {self.visit(node.value)}"
 
     def visit_Name(self, node):
-        return node.id
+        return f"\"{node.id}\""
 
     def visit_List(self, node):
         if len(node.elts) == 0:
@@ -474,22 +486,34 @@ class PrettyReader(NodeVisitor):
     """
 
     def visit_comprehension(self, node):
-        summary = (
-            f"{'an async' if node.is_async else 'a'}"
-            f" generator using {self.visit(node.target)} as an iterator"
-            f", looping through {self.visit(node.iter)}"
-            f", with guards of {self.visit_list(node.ifs)}"
-        )
+        guards = self.visit_list(node.ifs)
+
+        summary = ""\
+            + f"{'an async' if node.is_async else 'a'}"\
+            + f" generator, using {self.visit(node.target)} as an iterator"\
+            + f", looping through {self.visit(node.iter)}"\
+            + (f", guarded by {guards}" if len(guards) != 0 else "")
+
         return summary
 
     def visit_excepthandler(self, node):
         return "TODO"
 
     def visit_arguments(self, node):
-        return f"{len(node.args)} arguments: {self.visit_list(node.args)}"
+        grammar_suffix = ""
+
+        if len(node.args) == 0:
+            grammar_suffix = "s"
+        elif len(node.args) == 1:
+            grammar_suffix = ": "
+        else:
+            grammar_suffix = "s: "
+        
+
+        return f"{len(node.args)} argument{grammar_suffix}{self.visit_list(node.args)}"
     
     def visit_arg(self, node):
-        return node.arg + (f" of type {self.visit(node.annotation)}" if node.annotation else "")
+        return f"\"{node.arg}\"" + (f" of type {self.visit(node.annotation)}" if node.annotation else "")
 
     def visit_excepthandler(self, node):
         return "TODO"
