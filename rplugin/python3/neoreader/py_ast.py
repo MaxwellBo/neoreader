@@ -490,7 +490,7 @@ class PrettyReader(NodeVisitor):
 
         summary = ""\
             + f"{'an async' if node.is_async else 'a'}"\
-            + f" generator, using {self.visit(node.target)} as an iterator"\
+            + f" generator using {self.visit(node.target)} as an iterator"\
             + f", looping through {self.visit(node.iter)}"\
             + (f", guarded by {guards}" if len(guards) != 0 else "")
 
