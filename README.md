@@ -13,7 +13,7 @@ x = [i for i in range(1, 100) if 10 < i < 20]
 ```
 is read as
 
-> L-value x assigned a list comprehension of i, from a generator using i as an iterator, looping through range called with 1 and 100, with a guard of 10 is less than i is less than 20
+> L-value "x" assigned a list comprehension of "i", from a generator using "i" as an iterator, looping through "range" called with 2 arguments: 1 and 100, guarded by 10 is less than "i" is less than 20
 
 ## Requirements
 
