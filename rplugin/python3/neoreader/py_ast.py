@@ -142,8 +142,8 @@ class PrettyReader(NodeVisitor):
 
         summary = "an if block"\
             + f", testing {self.visit(node.test)}"\
-            + f", with a true branch of {self.visit_list(node.body)}"\
-            + (f", and an false branch of {false_branch}" if len(false_branch) != 0 else "")
+            + f", with a True branch of {self.visit_list(node.body)}"\
+            + (f", and an False branch of {false_branch}" if len(false_branch) != 0 else "")
         return summary
 
     def visit_With(self, node, is_async=False):
@@ -317,7 +317,7 @@ class PrettyReader(NodeVisitor):
         return str(node.n)
 
     def visit_Str(self, node):
-        return node.s
+        return f"\"{node.s}\""
 
     def visit_FormattedValue(self, node):
         return "TODO"
@@ -500,15 +500,9 @@ class PrettyReader(NodeVisitor):
         return "TODO"
 
     def visit_arguments(self, node):
-        grammar_suffix = ""
-
-        if len(node.args) == 0:
-            grammar_suffix = "s"
-        elif len(node.args) == 1:
-            grammar_suffix = ": "
-        else:
-            grammar_suffix = "s: "
-        
+        grammar_suffix = "s" if len(node.args) == 0 else\
+                         ": " if len(node.args) == 1 else\
+                         "s: " 
 
         return f"{len(node.args)} argument{grammar_suffix}{self.visit_list(node.args)}"
     
