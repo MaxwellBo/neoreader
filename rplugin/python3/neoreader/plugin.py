@@ -87,7 +87,8 @@ def requires_option(option):
 @neovim.plugin
 class Main(object):
     class Options(enum.Enum):
-        interpet_generic_infix = ('interpet_generic_infix', True)
+        ENABLE_AT_STARTUP = ('enable_at_startup', True)
+        INTERPRET_GENERIC_INFIX = ('interpet_generic_infix', True)
         INTERPRET_HASKELL_INFIX = ('interpret_haskell_infix', False)
         SPEAK_BRACKETS = ('speak_brackets', False)
         SPEAK_KEYPRESSES = ('speak_keypresses', False)
@@ -104,6 +105,7 @@ class Main(object):
         self.vim = vim
         self.last_spoken = ""
         self.current_process = None
+        self.enabled = self.get_option(self.Options.ENABLE_AT_STARTUP)
         self.literal_stack = []
 
     def get_option(self, option):
@@ -163,7 +165,8 @@ class Main(object):
                 txt = f"[[ char LTRL ]] {txt}"
             args.append(txt)
 
-        subprocess.run(args)
+        if self.enabled:
+            subprocess.run(args)
 
     def speak(self, 
         txt: str,
@@ -185,7 +188,7 @@ class Main(object):
             haskell = self.get_option(self.Options.INTERPRET_HASKELL_INFIX)
 
         if generic is None:
-            generic = self.get_option(self.Options.interpet_generic_infix)
+            generic = self.get_option(self.Options.INTERPRET_GENERIC_INFIX)
 
         if speed is None:
             speed = self.get_option(self.Options.SPEED)

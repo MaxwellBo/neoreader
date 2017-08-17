@@ -52,6 +52,7 @@ vnoremap <Leader>s :SpeakRangeDetail<cr>
 vnoremap <Leader>d :SpeakRangeExplain<cr>
 
 " defaults
+let g:enable_at_startup = 1
 let g:interpet_generic_infix = 1
 let g:interpret_haskell_infix = 0
 let g:speak_brackets = 0
