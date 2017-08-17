@@ -104,7 +104,6 @@ class Main(object):
     def __init__(self, vim):
         self.vim = vim
         self.last_spoken = ""
-        self.current_process = None
         self.enabled = self.get_option(self.Options.ENABLE_AT_STARTUP)
         self.literal_stack = []
 
