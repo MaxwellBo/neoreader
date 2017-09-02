@@ -4,8 +4,17 @@ from typing import List
 import enum
 import functools
 import ast
+import logging
 
 from .py_ast import PrettyReader
+
+# Logging config
+logger = logging.getLogger('neoreader')
+_handler = logging.FileHandler('/tmp/neoreader.log', 'a')
+_handler.setFormatter(logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(_handler)
+logger.setLevel(logging.DEBUG)
 
 
 COMPARISONS =\
@@ -165,6 +174,7 @@ class Main(object):
             args.append(txt)
 
         if self.enabled:
+            logger.debug(f"Saying '{txt}'")
             subprocess.run(args)
 
     def speak(self, 
