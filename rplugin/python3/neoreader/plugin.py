@@ -51,6 +51,11 @@ GENERIC_BIN_OPS =\
     , "?:": "elvis"
     }
 
+UNICODE_ATOMS =\
+    { "⊥": "bottom"
+    , "⊤": "top"
+    }
+
 HASKELL_BIN_OPS =\
     { "<$>": "effmap"
     , "<*>": "applic"
@@ -72,6 +77,26 @@ HASKELL_BIN_OPS =\
     , ".": "compose"
     }
 
+# https://typelevel.org/cats/faq.html
+SCALA_BIN_OPS =\
+    { "<*>": "apply"
+    , "===": "equals"
+    , "=!=": "not equals"
+    , ">>=": "flatMap"
+    , "|-|": "remove"
+    , "|+|": "Semigroup combine"
+    , "<+>": "SemigroupK combine"
+    , "<<<": "Arrow compose"
+    , ">>>": "Arrow andThen"
+    , "~>" "natural transformation"
+    , ":<:" "injectK"
+    , ":≺:" "injectK"
+    , "<<": "for effect"
+    , "*>": "right apply"
+    , "<*": "left apply"
+    , ":+:": "space-invader"
+    }
+
 def requires_option(option):
     def decorator(fn):
         @functools.wraps(fn)
@@ -90,6 +115,9 @@ class Main(object):
         ENABLE_AT_STARTUP = ('enable_at_startup', True)
         INTERPRET_GENERIC_INFIX = ('interpet_generic_infix', True)
         INTERPRET_HASKELL_INFIX = ('interpret_haskell_infix', False)
+        # TODO: Wire these up and add comments to the README.md indicating default values
+        INTERPRET_SCALA_INFIX = ('interpret_scala_infix', False)
+        INTERPRET_UNICODE_ATOMS = ('interpret_unicode_atoms', True)
         SPEAK_BRACKETS = ('speak_brackets', False)
         SPEAK_KEYPRESSES = ('speak_keypresses', False)
         SPEAK_WORDS = ('speak_words', True)
