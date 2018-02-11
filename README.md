@@ -2,11 +2,11 @@
 
 neoreader is a screenreader for Neovim. It supports:
 
-- generalised syntax rewrites, such as infix substitutions 
+- general infix operator identification:
   + `->` is read as "stab" if `interpet_generic_infix` is enabled
-- language specific syntax rewrites
+- language specific syntax infix operator identification:
   + `->` is read as "yields" if `interpret_haskell_infix` is enabled
-- Python 3 specific semantic analysis for more intelligible reading
+- Python 3 specific AST analysis for more intelligible reading
 
 ```python
 x = [i for i in range(1, 100) if 10 < i < 20]
