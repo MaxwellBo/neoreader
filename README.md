@@ -7,6 +7,7 @@ neoreader is a screenreader for Neovim. It supports:
 - language specific infix operator identification:
   + `->` is read as "yields" if `interpret_haskell_infix` is enabled
 - dynamic pitch to indicate indentation level if `speak_indent` is enabled
+- spoken keypresses, completed word reading, auto line reading on line transition and Vim mode transition alerts
 - Python 3 specific AST analysis for more intelligible reading:
 
 ```python
