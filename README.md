@@ -6,6 +6,7 @@ neoreader is a screenreader for Neovim. It supports:
   + `->` is read as "stab" if `interpet_generic_infix` is enabled
 - language specific infix operator identification:
   + `->` is read as "yields" if `interpret_haskell_infix` is enabled
+- dynamic pitch to indicate indentation level if `speak_indent` is enabled
 - Python 3 specific AST analysis for more intelligible reading:
 
 ```python
