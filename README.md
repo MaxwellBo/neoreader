@@ -67,6 +67,7 @@ let g:speak_indent = 0
 let g:pitch_multiplier = 1
 let g:speak_speed = 350
 let g:use_espeak = 0
+let g:speak_voice = ''
 ```
 
 ## Contributors
