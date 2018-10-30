@@ -109,6 +109,7 @@ class Main(object):
         PITCH_MULTIPLIER = ('pitch_multiplier', 1)
         SPEED = ('speak_speed', 350)
         USE_ESPEAK = ('use_espeak', False)
+        SPEAK_VOICE = ('speak_voice', '')
 
     def __init__(self, vim):
         self.vim = vim
@@ -154,8 +155,12 @@ class Main(object):
         return lines
 
     def call_say(self, txt: str, speed=None, pitch=None, literal=False):
+        voice = self.get_option(self.Options.SPEAK_VOICE)
+
         if self.get_option(self.Options.USE_ESPEAK):
             args = ["espeak"]
+            if voice:
+                args += ["-v", voice]
             if pitch:
                 args += ["-p", str(pitch)]
             if speed:
@@ -165,6 +170,8 @@ class Main(object):
             args.append(txt)
         else:
             args = ["say"]
+            if voice:
+                args += ["-v", voice]
             if pitch:
                 txt = f"[[ pbas +{pitch}]] {txt}"
             if speed:
