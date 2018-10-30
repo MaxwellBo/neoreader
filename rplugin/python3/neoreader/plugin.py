@@ -249,7 +249,11 @@ class Main(object):
             explained += " column {e.offset}"
 
         return explained
-        
+
+    @neovim.function('Speak')
+    def fn_speak(self, text):
+        self.speak(text)
+
     @neovim.command('SpeakLine')
     def cmd_speak_line(self):
         current = self.vim.current.line
