@@ -69,6 +69,10 @@ let g:speak_speed = 350
 let g:use_espeak = 0
 ```
 
+## Helpful tipos
+
+Using the command-line window (with `q:`, `q/`, and `q?`) will enable neoreader to assist in your command-line usage aswell.
+
 ## Contributors
 
 - [Lewis Bobbermen](https://github.com/lewisjb)
