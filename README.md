@@ -28,18 +28,21 @@ You can enable the Python 3 interface with `pip`:
 
 You must be using Python 3.6.
 
-You may use macOS's Speech Synthesis API _OR_ [eSpeak](https://github.com/rhdunn/espeak).
+You may use macOS's Speech Synthesis API _OR_ [eSpeak](https://espeak.sourceforge.net/).
 
 
 ## Installation
 
-For [vim-plug](https://github.com/junegunn/vim-plug), add 
+For [vim-plug](https://github.com/junegunn/vim-plug), add
 
 ```vim
 Plug 'MaxwellBo/neoreader'
 ```
 
 to your configuration, and execute `:PlugInstall`.
+
+If you are using eSpeak, additionally add `let g:use_espeak = 1` to your
+configuration.
 
 Execute `:UpdateRemotePlugins` and restart Neovim.
 
