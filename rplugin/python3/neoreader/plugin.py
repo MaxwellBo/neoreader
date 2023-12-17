@@ -155,6 +155,9 @@ class Main(object):
         return lines
 
     def call_say(self, txt: str, speed=None, pitch=None, literal=False):
+        if not self.enabled:
+            return
+
         voice = self.get_option(self.Options.SPEAK_VOICE)
 
         if self.get_option(self.Options.USE_ESPEAK):
@@ -180,9 +183,13 @@ class Main(object):
                 txt = f"[[ char LTRL ]] {txt}"
             args.append(txt)
 
-        if self.enabled:
-            logger.debug(f"Saying '{txt}'")
+        logger.debug(f"Saying '{txt}'")
+        try:
             subprocess.run(args)
+        except FileNotFoundError as e:
+            command = args[0]
+            self.vim.api.err_writeln(f"Speak command '{command}' not found!")
+            self.enabled = False
 
     def speak(self, 
         txt: str,
